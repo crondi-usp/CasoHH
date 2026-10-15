@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>Controle Hierarquia GLB</title>
+  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.controls.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/aframe-orbit-controls-component@1.4.0/dist/aframe-orbit-controls-component.min.js"></script>
+
+
+  <style>
+    body { margin:0; position:absolute; width:100%; height:100%; font-family:sans-serif; }
+    button {
+      position: relative;
+      z-index: 1;
+      padding: 6px 12px;
+      font-size: 12px;
+      margin: 2px;
+    }
+	.panel {
+	  position: absolute;
+	  top: 10px;
+	  left: 10px;
+	  background: rgba(255,255,255,0.85);
+	  padding: 10px;
+	  border-radius: 6px;
+	  display: flex;
+	  flex-direction: column;
+	  gap: 10px;
+	  width: 200px;
+	}
+  </style>
+</head>
+<body>
+
+	<div class="panel">
+	  <button id="btnSkin">Pele</button>
+	  <button id="btnBones">Osso</button>
+	  <button id="btnHeleRight">Helena Dir.</button>
+	  <button id="btnHeleLeft">Helena Esq.</button>
+	  <button id="btnHeloRight">Heloisa Dir.</button>
+	  <button id="btnHeloLeft">Heloisa Esq.</button>
+	  <button id="btnVeinHigh">Veias Finas</button>
+	  <button id="btnVeinMed">Veias Médias</button>
+	  <button id="btnVeinLow">Veias Grossas</button>
+	  <button id="btnMeninges">Meninges</button>
+	</div>
+
+  <a-scene vr-mode-ui="enabled: true" embedded>
+    <a-assets>
+      <a-asset-item id="model"
+        src="model_skin_textured2.glb">
+      </a-asset-item>
+    </a-assets>
+
+    <a-entity id="modelRoot" gltf-model="#model" position="0 16 -100" scale="0.3 0.3 0.3" rotation="-90 180 0"></a-entity>
+    <a-camera
+          wasd-controls="acceleration: 300"
+	  orbit-controls="target: 1000 1000 1000; enableDamping: true; dampingFactor: 0; rotateSpeed: 0.7; panSpeed: 0.9;"
+	  position="0 1.6 0"></a-camera>
+  </a-scene>
+
+  <script>
+    const nodeNames = {
+      btnSkin: 'Skin',
+      btnBones: 'Bones',
+      btnHeleRight: 'HelenaRight',
+      btnHeleLeft: 'HelenaLeft',
+      btnHeloRight: 'HeloisaRight',
+      btnHeloLeft: 'HeloisaLeft',
+      btnVeinHigh: 'VeinsHigh',
+      btnVeinMed: 'VeinsMed',
+      btnVeinLow: 'VeinsLow',
+      btnMeninges: 'Meninges'
+    };
+
+    Object.entries(nodeNames).forEach(([btnId, nodeName]) => {
+      document.getElementById(btnId).addEventListener('click', () => togglePart(nodeName));
+    });
+
+    function togglePart(partName) {
+      const model = document.querySelector('#modelRoot');
+      if (!model.hasLoaded) {
+        model.addEventListener('model-loaded', () => toggleVisibility(model, partName));
+      } else {
+        toggleVisibility(model, partName);
+      }
+    }
+
+    function toggleVisibility(model, partName) {
+      const mesh = model.getObject3D('mesh');
+      if (!mesh) return;
+
+      const target = mesh.getObjectByName(partName);
+      if (target) {
+        target.visible = !target.visible;
+        console.log(`${partName} visibilidade:`, target.visible);
+      } else {
+        console.warn(`Nodo não encontrado: ${partName}`);
+      }
+    }
+  </script>
+</body>
+</html>
